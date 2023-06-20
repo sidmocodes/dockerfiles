@@ -1,0 +1,29 @@
+# Backend Dockerfile
+
+# Use the appropriate base image with the desired .NET version
+FROM mcr.microsoft.com/dotnet/sdk:6.0 AS build
+
+# Set the working directory
+WORKDIR /app
+
+# Copy the backend project files to the container
+COPY . .
+
+# Build the backend application
+RUN dotnet restore
+RUN dotnet build --configuration Release
+
+# Set the runtime image
+FROM mcr.microsoft.com/dotnet/aspnet:6.0 AS runtime
+
+# Set the working directory for the runtime image
+WORKDIR /app
+
+# Copy the built application from the build image
+COPY --from=build /app/out .
+
+# Expose the desired port
+EXPOSE 80
+
+# Start the backend application
+ENTRYPOINT ["dotnet", "YourBackendProject.dll"]
