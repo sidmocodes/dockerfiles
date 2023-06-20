@@ -42,3 +42,21 @@ spec:
       port: 80
       targetPort: 80
   type: ClusterIP
+
+  Yes, when onboarding an application to OpenShift, there are typically a few prerequisites that need to be fulfilled. These include:
+
+1. Dockerizing the Application: Dockerizing your application involves creating Docker containers for your application components. This allows you to package the application along with its dependencies into a portable and isolated container. Dockerizing your application ensures consistency and reproducibility when deploying it on OpenShift.
+
+2. Jenkins Setup: Jenkins is a popular open-source automation server that can be used for building, testing, and deploying applications. Setting up Jenkins involves installing and configuring the Jenkins server, creating build pipelines, and defining jobs to automate the build and deployment processes of your application.
+
+3. YAML Configuration: OpenShift uses YAML configuration files to define the desired state of the application's deployment, services, routes, and other resources within the cluster. These YAML files specify the configurations and parameters required to deploy and manage your application on OpenShift.
+
+To onboard your application to OpenShift, you would typically follow these steps:
+
+1. Dockerize your application by creating Dockerfiles for each component of your application (such as Backend and Frontend) and building Docker images.
+2. Set up Jenkins by installing and configuring the Jenkins server, installing necessary plugins, and setting up build pipelines or jobs for your application.
+3. Create YAML configuration files that define the deployment, services, routes, and other resources needed for your application in OpenShift.
+4. Configure Jenkins pipelines or jobs to use the Docker images, build the application, and deploy it to OpenShift using the YAML configuration files.
+5. Run the Jenkins pipelines or jobs to trigger the build and deployment processes on OpenShift.
+
+By following these steps and fulfilling the prerequisites, you can successfully onboard your application to OpenShift and automate the build and deployment processes using Jenkins and YAML configurations.
