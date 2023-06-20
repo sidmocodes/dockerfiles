@@ -1,0 +1,37 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: your-app-name-frontend
+  labels:
+    app: your-app-name-frontend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: your-app-name-frontend
+  template:
+    metadata:
+      labels:
+        app: your-app-name-frontend
+    spec:
+      containers:
+        - name: your-app-name-frontend
+          image: your-docker-registry/your-openshift-project/your-app-name-frontend
+          ports:
+            - containerPort: 80
+          env:
+            # Add any environment variables required by your frontend application
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: your-app-name-frontend
+spec:
+  selector:
+    app: your-app-name-frontend
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 80
+  type: ClusterIP
