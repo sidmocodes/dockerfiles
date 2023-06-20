@@ -1,0 +1,93 @@
+pipeline {
+    agent any
+
+    environment {
+        def backendProjectName = 'B'
+        def frontendProjectName = 'F'
+        def openshiftProjectName = 'your-openshift-project'
+        def openshiftAppName = 'your-app-name'
+        def dockerRegistry = 'your-docker-registry'
+        def dockerRegistryCredentials = 'your-docker-registry-credentials'
+        def branchName = 'your-bitbucket-branch'
+        def nugetRestorePath = 'nuget.exe'
+        def dotnetPath = 'dotnet'
+        def msbuildPath = 'msbuild.exe'
+    }
+
+    stages {
+        stage('Checkout') {
+            steps {
+                git branch: "${branchName}", url: 'https://bitbucket.org/your-bitbucket-org/your-repo.git'
+            }
+        }
+
+        stage('Build Backend') {
+            steps {
+                dir(backendProjectName) {
+                    script {
+                        withEnv(["DOTNET_CLI_TELEMETRY_OPTOUT=1"]) {
+                            sh "${dotnetPath} restore"
+                            sh "${dotnetPath} build --configuration Release"
+                        }
+                    }
+                }
+            }
+        }
+
+        stage('Build Frontend') {
+            steps {
+                dir(frontendProjectName) {
+                    script {
+                        sh "${nugetRestorePath}"
+                        sh "${msbuildPath} /p:Configuration=Release"
+                    }
+                }
+            }
+        }
+
+        stage('Build Docker Image') {
+            steps {
+                script {
+                    def backendImageName = "${dockerRegistry}/${openshiftProjectName}/${openshiftAppName}-backend"
+                    def frontendImageName = "${dockerRegistry}/${openshiftProjectName}/${openshiftAppName}-frontend"
+
+                    withEnv(["DOCKER_CLI_EXPERIMENTAL=enabled"]) {
+                        dir(backendProjectName) {
+                            sh "docker build -t ${backendImageName} -f Dockerfile ."
+                        }
+                        dir(frontendProjectName) {
+                            sh "docker build -t ${frontendImageName} -f Dockerfile ."
+                        }
+
+                        withCredentials([usernamePassword(credentialsId: "${dockerRegistryCredentials}", usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASSWORD')]) {
+                            sh "docker login -u ${DOCKER_USERNAME} -p ${DOCKER_PASSWORD} ${dockerRegistry}"
+                            sh "docker push ${backendImageName}"
+                            sh "docker push ${frontendImageName}"
+                        }
+                    }
+                }
+            }
+        }
+
+        stage('Deploy to OpenShift') {
+            steps {
+                script {
+                    def backendImageName = "${dockerRegistry}/${openshiftProjectName}/${openshiftAppName}-backend"
+                    def frontendImageName = "${dockerRegistry}/${openshiftProjectName}/${openshiftAppName}-frontend"
+
+                    withEnv(["KUBECONFIG=${JENKINS_HOME}/.kube/config"]) {
+                        sh "oc project ${openshiftProjectName}"
+
+                        sh "oc delete dc/${openshiftAppName}-backend || true"
+                        sh "oc new-app ${backendImageName} --name=${openshiftAppName}-backend"
+                        sh "oc expose svc/${openshiftAppName}-backend"
+
+                        sh "oc delete dc/${openshiftAppName}-frontend || true"
+                        sh "oc new-app ${frontendImageName} --name=${openshiftAppName}-frontend"
+                        sh "oc expose svc/${openshiftAppName}-frontend"
+                    }
+                }
+            }
+        }
+    }
+}
