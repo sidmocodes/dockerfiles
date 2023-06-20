@@ -1,0 +1,37 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: your-app-name-backend
+  labels:
+    app: your-app-name-backend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: your-app-name-backend
+  template:
+    metadata:
+      labels:
+        app: your-app-name-backend
+    spec:
+      containers:
+        - name: your-app-name-backend
+          image: your-docker-registry/your-openshift-project/your-app-name-backend
+          ports:
+            - containerPort: 80
+          env:
+            # Add any environment variables required by your backend application
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: your-app-name-backend
+spec:
+  selector:
+    app: your-app-name-backend
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 80
+  type: ClusterIP
