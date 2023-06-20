@@ -1,0 +1,29 @@
+# Frontend Dockerfile
+
+# Use the appropriate base image with the desired .NET Framework version
+FROM mcr.microsoft.com/dotnet/framework/sdk:4.7.2 AS build
+
+# Set the working directory
+WORKDIR /app
+
+# Copy the frontend project files to the container
+COPY . .
+
+# Build the frontend application
+RUN nuget restore
+RUN msbuild /p:Configuration=Release
+
+# Set the runtime image
+FROM mcr.microsoft.com/dotnet/framework/aspnet:4.7.2 AS runtime
+
+# Set the working directory for the runtime image
+WORKDIR /inetpub/wwwroot
+
+# Copy the built application from the build image
+COPY --from=build /app/bin/Release .
+
+# Expose the desired port
+EXPOSE 80
+
+# Start the frontend application
+ENTRYPOINT ["YourFrontendProject.exe"]
