@@ -18,6 +18,19 @@ body {
     background-color: #FFD700;
     padding: 10px;
     border-bottom: 2px solid #000;
+    padding: 10px 0; /* Adjusted padding for blue background */
+    position: relative;
+}
+
+.header::before {
+    content: '';
+    background-color: #0000FF; /* Blue background */
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: -1;
 }
 
 .header .logo, .header .title, .header .image {
@@ -26,6 +39,7 @@ body {
 
 .header .logo {
     flex: 1;
+    padding-left: 10px; /* Adding padding inside the logo section */
 }
 
 .header .title {
@@ -36,6 +50,7 @@ body {
 .header .image {
     flex: 1;
     text-align: right;
+    padding-right: 10px; /* Adding padding inside the image section */
 }
 
 .main {
